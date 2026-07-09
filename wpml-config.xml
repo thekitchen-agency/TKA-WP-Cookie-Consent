@@ -1,0 +1,14 @@
+<wpml-config>
+    <admin-texts>
+        <key name="tka_cookie_consent_options">
+            <key name="banner_title" />
+            <key name="banner_text" />
+            <key name="btn_accept" />
+            <key name="btn_reject" />
+            <key name="btn_customize" />
+            <key name="scripts_statistics" />
+            <key name="scripts_marketing" />
+            <key name="scripts_preferences" />
+        </key>
+    </admin-texts>
+</wpml-config>

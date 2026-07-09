@@ -1,0 +1,289 @@
+# Copyright (C) 2026 TKA
+# This file is distributed under the MIT.
+msgid ""
+msgstr ""
+"Project-Id-Version: TKA Cookie Consent 1.0.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/tka-cookie-"
+"consent\n"
+"POT-Creation-Date: 2026-06-27T23:22:53+02:00\n"
+"PO-Revision-Date: 2026-06-27T23:10:00+02:00\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: German\n"
+"Language: de_DE\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: tka-cookie-consent\n"
+
+#. Plugin Name of the plugin
+#: tka-cookie-consent.php
+msgid "TKA Cookie Consent"
+msgstr "TKA Cookie Consent"
+
+#. Description of the plugin
+#: tka-cookie-consent.php
+msgid ""
+"A lightweight, modern cookie consent plugin compatible with the WP Consent "
+"API standard."
+msgstr ""
+"Ein leichtgewichtiges, modernes Cookie-Einverständnis-Plugin, das mit dem WP-"
+"Consent-API-Standard kompatibel ist."
+
+#. Author of the plugin
+#: tka-cookie-consent.php
+msgid "TKA"
+msgstr "TKA"
+
+#. Author URI of the plugin
+#: tka-cookie-consent.php
+msgid "https://wp-play.ddev.site"
+msgstr "https://wp-play.ddev.site"
+
+#: includes/AdminSettings.php:25
+msgid "Cookie Consent Settings"
+msgstr "Cookie-Einverständnis-Einstellungen"
+
+#: includes/AdminSettings.php:26
+msgid "Cookie Consent"
+msgstr "Cookie-Einverständnis"
+
+#: includes/AdminSettings.php:54
+msgid "General Banner Settings"
+msgstr "Allgemeine Banner-Einstellungen"
+
+#: includes/AdminSettings.php:61
+msgid "Banner Title"
+msgstr "Banner-Titel"
+
+#: includes/AdminSettings.php:65
+msgid "We value your privacy"
+msgstr "Wir schätzen Ihre Privatsphäre"
+
+#: includes/AdminSettings.php:70
+msgid "Banner Text"
+msgstr "Banner-Text"
+
+#: includes/AdminSettings.php:76
+msgid ""
+"We use cookies to enhance your browsing experience, serve personalized ads "
+"or content, and analyze our traffic. By clicking \"Accept All\", you consent "
+"to our use of cookies."
+msgstr ""
+"Wir verwenden Cookies, um Ihr Surferlebnis zu verbessern, personalisierte "
+"Werbung oder Inhalte bereitzustellen und unseren Datenverkehr zu "
+"analysieren. Indem Sie auf „Alle akzeptieren“ klicken, stimmen Sie der "
+"Verwendung von Cookies zu."
+
+#: includes/AdminSettings.php:82
+msgid "Accept Button Label"
+msgstr "Beschriftung der Schaltfläche „Akzeptieren“"
+
+#: includes/AdminSettings.php:86
+msgid "Accept All"
+msgstr "Alle akzeptieren"
+
+#: includes/AdminSettings.php:91
+msgid "Reject Button Label"
+msgstr "Beschriftung der Schaltfläche „Ablehnen“"
+
+#: includes/AdminSettings.php:95
+msgid "Reject All"
+msgstr "Alle ablehnen"
+
+#: includes/AdminSettings.php:100
+msgid "Customize Button Label"
+msgstr "Beschriftung der Schaltfläche „Anpassen“"
+
+#: includes/AdminSettings.php:104
+msgid "Customize"
+msgstr "Anpassen"
+
+#: includes/AdminSettings.php:110
+msgid "Script Blocking Settings"
+msgstr "Einstellungen für Skriptblockierung"
+
+#: includes/AdminSettings.php:117
+msgid "Statistics Scripts"
+msgstr "Statistik-Skripte"
+
+#: includes/AdminSettings.php:124
+msgid ""
+"Enter a comma-separated list of script handles or URL keywords (e.g., google-"
+"analytics.com, gtag) to block until Statistics consent is granted."
+msgstr ""
+"Geben Sie eine kommagetrennte Liste von Skript-Handles oder URL-"
+"Schlüsselwörtern (z. B. google-analytics.com, gtag) ein, die blockiert "
+"werden sollen, bis die Einwilligung für Statistiken erteilt wurde."
+
+#: includes/AdminSettings.php:130
+msgid "Marketing Scripts"
+msgstr "Marketing-Skripte"
+
+#: includes/AdminSettings.php:137
+msgid ""
+"Enter a comma-separated list of script handles or URL keywords to block "
+"until Marketing consent is granted."
+msgstr ""
+"Geben Sie eine kommagetrennte Liste von Skript-Handles oder URL-"
+"Schlüsselwörtern ein, die blockiert werden sollen, bis die Einwilligung für "
+"Marketing erteilt wurde."
+
+#: includes/AdminSettings.php:143
+msgid "Preferences Scripts"
+msgstr "Präferenz-Skripte"
+
+#: includes/AdminSettings.php:150
+msgid ""
+"Enter a comma-separated list of script handles or URL keywords to block "
+"until Preferences consent is granted."
+msgstr ""
+"Geben Sie eine kommagetrennte Liste von Skript-Handles oder URL-"
+"Schlüsselwörtern ein, die blockiert werden sollen, bis die Einwilligung für "
+"Präferenzen erteilt wurde."
+
+#: includes/AdminSettings.php:157
+msgid "Custom Script Injection Blocks"
+msgstr ""
+
+#: includes/AdminSettings.php:164
+#, fuzzy
+msgid "Statistics Scripts Code"
+msgstr "Statistik-Skripte"
+
+#: includes/AdminSettings.php:171
+msgid ""
+"Pasted script tags (including `<script>`) to run when Statistics consent is "
+"granted (e.g. Google Analytics or Hotjar)."
+msgstr ""
+
+#: includes/AdminSettings.php:177
+#, fuzzy
+msgid "Marketing Scripts Code"
+msgstr "Marketing-Skripte"
+
+#: includes/AdminSettings.php:184
+msgid ""
+"Pasted script tags (including `<script>`) to run when Marketing consent is "
+"granted (e.g. Facebook Pixel)."
+msgstr ""
+
+#: includes/AdminSettings.php:190
+#, fuzzy
+msgid "Preferences Scripts Code"
+msgstr "Präferenz-Skripte"
+
+#: includes/AdminSettings.php:197
+msgid ""
+"Pasted script tags (including `<script>`) to run when Preferences consent is "
+"granted."
+msgstr ""
+
+#: includes/AdminSettings.php:322
+msgid "Type"
+msgstr "Typ"
+
+#: includes/AdminSettings.php:323
+msgid "Script / Handle"
+msgstr "Skript / Handle"
+
+#: includes/AdminSettings.php:324
+msgid "Suggested Category"
+msgstr "Empfohlene Kategorie"
+
+#: includes/AdminSettings.php:325
+msgid "Status"
+msgstr "Status"
+
+#: includes/AdminSettings.php:326
+msgid "Actions"
+msgstr "Aktionen"
+
+#: includes/AdminSettings.php:327
+msgid "Blocked"
+msgstr "Blockiert"
+
+#: includes/AdminSettings.php:328
+msgid "Not Blocked"
+msgstr "Nicht blockiert"
+
+#: includes/AdminSettings.php:329
+#, php-format
+msgid "Block as %s"
+msgstr "Als %s blockieren"
+
+#: includes/AdminSettings.php:330
+msgid "Already Blocked"
+msgstr "Bereits blockiert"
+
+#: includes/AdminSettings.php:331
+msgid "No scripts detected on the homepage."
+msgstr "Keine Skripte auf der Homepage erkannt."
+
+#: includes/AdminSettings.php:357
+msgid "Script Scanner"
+msgstr "Skript-Scanner"
+
+#: includes/AdminSettings.php:358
+msgid ""
+"Scan the homepage of your website to discover loaded scripts and add them to "
+"the blocking lists."
+msgstr ""
+"Scannen Sie die Startseite Ihrer Website, um geladene Skripte zu erkennen "
+"und sie den Blockierlisten hinzuzufügen."
+
+#: includes/AdminSettings.php:361
+msgid "Scan Homepage"
+msgstr "Homepage scannen"
+
+#: includes/Plugin.php:163
+msgid "Read our Privacy Policy"
+msgstr "Lesen Sie unsere Datenschutzerklärung"
+
+#: includes/Plugin.php:172
+msgid "Strictly Necessary"
+msgstr "Unbedingt erforderlich"
+
+#: includes/Plugin.php:173
+msgid "Required for the site to function properly."
+msgstr "Für das ordnungsgemäße Funktionieren der Website erforderlich."
+
+#: includes/Plugin.php:179
+msgid "Preferences"
+msgstr "Präferenzen"
+
+#: includes/Plugin.php:180
+msgid "Remember your preferences and settings."
+msgstr "Merken Sie sich Ihre Präferenzen und Einstellungen."
+
+#: includes/Plugin.php:186
+msgid "Statistics"
+msgstr "Statistiken"
+
+#: includes/Plugin.php:187
+msgid "Help us understand how you interact with our site."
+msgstr "Helfen Sie uns zu verstehen, wie Sie mit unserer Website interagieren."
+
+#: includes/Plugin.php:193
+msgid "Marketing"
+msgstr "Marketing"
+
+#: includes/Plugin.php:194
+msgid "Used to deliver personalized ads and content."
+msgstr "Verwendet zur Bereitstellung personalisierter Werbung und Inhalte."
+
+#: includes/Plugin.php:204
+msgid "Save Preferences"
+msgstr "Einstellungen speichern"
+
+#: includes/Plugin.php:217
+msgid "Unauthorized"
+msgstr "Nicht autorisiert"
+
+#: includes/Plugin.php:232
+msgid "Empty response from site homepage."
+msgstr "Leere Antwort von der Homepage der Website."
+
+#: includes/Plugin.php:273
+msgid "Inline Script"
+msgstr "Inline-Skript"
