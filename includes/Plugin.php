@@ -28,10 +28,18 @@ class Plugin
      */
     public function run()
     {
+        // Initialize Licensing
+        \Tka\CookieConsent\Licensing\Licensing::init();
+
         // Register Admin Settings page
         if (is_admin()) {
             $this->admin_settings->register();
             add_action('wp_ajax_tka_scan_scripts', [$this, 'ajax_scan_scripts']);
+        }
+
+        // If license is not active, do not load other features
+        if (!\Tka\CookieConsent\Licensing\Licensing::isActive()) {
+            return;
         }
 
         // Script tag interceptor to block cookies before consent

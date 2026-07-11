@@ -341,9 +341,117 @@ class AdminSettings
         if (!current_user_can('manage_options')) {
             return;
         }
+
+        $status = get_option('tka_cookie_consent_license_status', []);
+        $message = '';
+        $message_type = 'updated';
+        $server_url = 'https://plugins.thekitchen.agency';
+
+        $request_method = isset($_SERVER['REQUEST_METHOD']) ? sanitize_text_field(wp_unslash($_SERVER['REQUEST_METHOD'])) : '';
+
+        if ($request_method !== 'POST' && !empty($status['license_key']) && !\Tka\CookieConsent\Licensing\Licensing::isLocalEnvironment()) {
+            $manager = new \Tka\CookieConsent\Licensing\LicenseManager($server_url, $status['license_key'], 'tka-cookie-consent');
+            $result = $manager->verify();
+
+            if (isset($result['success']) && $result['success'] && isset($result['status']) && $result['status'] === 'active') {
+                $status['status'] = 'active';
+                $status['last_check'] = time();
+                $status['grace_active'] = false;
+                update_option('tka_cookie_consent_license_status', $status);
+                set_transient('tka_cookie_consent_license_check_transient', 'active', 24 * HOUR_IN_SECONDS);
+            } else {
+                if (isset($result['status']) && $result['status'] !== 'network_error') {
+                    $status['status'] = 'suspended';
+                    $status['error_message'] = $result['error'] ?? 'Unregistered domain seat.';
+                    update_option('tka_cookie_consent_license_status', $status);
+                    set_transient('tka_cookie_consent_license_check_transient', 'suspended', 24 * HOUR_IN_SECONDS);
+                }
+            }
+        }
+
+        if ($request_method === 'POST' && isset($_POST['tka_license_nonce']) && wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['tka_license_nonce'])), 'tka_license_action')) {
+            $action = isset($_POST['tka_license_action_type']) ? sanitize_text_field(wp_unslash($_POST['tka_license_action_type'])) : '';
+            $license_key = isset($_POST['tka_license_key']) ? sanitize_text_field(wp_unslash($_POST['tka_license_key'])) : '';
+
+            if ($action === 'activate' && !empty($license_key)) {
+                $manager = new \Tka\CookieConsent\Licensing\LicenseManager($server_url, $license_key, 'tka-cookie-consent');
+                $result = $manager->activate();
+
+                if (isset($result['success']) && $result['success']) {
+                    $status = [
+                        'license_key' => $license_key,
+                        'status' => 'active',
+                        'last_check' => time(),
+                        'grace_active' => false
+                    ];
+                    update_option('tka_cookie_consent_license_status', $status);
+                    set_transient('tka_cookie_consent_license_check_transient', 'active', 24 * HOUR_IN_SECONDS);
+                    $message = __('License activated successfully.', 'tka-cookie-consent');
+                    $message_type = 'updated';
+                } else {
+                    $message = $result['error'] ?? __('Failed to activate license.', 'tka-cookie-consent');
+                    $message_type = 'error';
+                }
+            } elseif ($action === 'deactivate') {
+                if (!empty($status['license_key'])) {
+                    $manager = new \Tka\CookieConsent\Licensing\LicenseManager($server_url, $status['license_key'], 'tka-cookie-consent');
+                    $manager->deactivate();
+                }
+                
+                $status = [];
+                update_option('tka_cookie_consent_license_status', $status);
+                delete_transient('tka_cookie_consent_license_check_transient');
+                
+                $message = __('License deactivated locally.', 'tka-cookie-consent');
+                $message_type = 'updated';
+            }
+        }
+
+        $is_active = \Tka\CookieConsent\Licensing\Licensing::isActive();
+        $is_local = \Tka\CookieConsent\Licensing\Licensing::isLocalEnvironment();
+        $current_key = $status['license_key'] ?? '';
+        $error_message = $status['error_message'] ?? '';
         ?>
         <div class="wrap">
             <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
+
+            <?php if (!empty($message)): ?>
+                <div class="notice notice-<?php echo esc_attr($message_type); ?> is-dismissible">
+                    <p><?php echo esc_html($message); ?></p>
+                </div>
+            <?php endif; ?>
+
+            <!-- Licensing Box -->
+            <div class="card" style="max-width: 900px; margin-bottom: 20px; padding: 15px; border-left: 4px solid <?php echo $is_active ? '#22c55e' : '#f59e0b'; ?>;">
+                <h2><?php esc_html_e('Licensing', 'tka-cookie-consent'); ?></h2>
+                <?php if ($is_local): ?>
+                    <p style="color: #22c55e; font-weight: bold; margin-bottom: 5px;"><?php esc_html_e('Local development bypass active.', 'tka-cookie-consent'); ?></p>
+                    <p style="font-size: 13px; color: #646970; margin-top: 0; margin-bottom: 15px;"><?php esc_html_e('Plugin features are unlocked for local development. You can activate a valid license key below to receive updates.', 'tka-cookie-consent'); ?></p>
+                <?php elseif ($is_active): ?>
+                    <p style="color: #22c55e; font-weight: bold;"><?php esc_html_e('License is active and verified.', 'tka-cookie-consent'); ?></p>
+                <?php elseif (!empty($status['status']) && $status['status'] === 'suspended'): ?>
+                    <p style="color: #ef4444; font-weight: bold;"><?php echo esc_html($error_message ? $error_message : __('Your license is suspended or invalid.', 'tka-cookie-consent')); ?></p>
+                <?php else: ?>
+                    <p><?php esc_html_e('Please enter your license key to activate the plugin features.', 'tka-cookie-consent'); ?></p>
+                <?php endif; ?>
+
+                <?php
+                $is_really_active = !empty($status['status']) && $status['status'] === 'active';
+                ?>
+                <form method="post" action="">
+                    <?php wp_nonce_field('tka_license_action', 'tka_license_nonce'); ?>
+                    <input type="text" name="tka_license_key" value="<?php echo esc_attr($current_key); ?>" class="regular-text" <?php echo $is_really_active ? 'readonly' : ''; ?> />
+                    <?php if ($is_really_active): ?>
+                        <input type="hidden" name="tka_license_action_type" value="deactivate">
+                        <button type="submit" class="button button-link-delete" style="color: #ef4444;"><?php esc_html_e('Deactivate License', 'tka-cookie-consent'); ?></button>
+                    <?php else: ?>
+                        <input type="hidden" name="tka_license_action_type" value="activate">
+                        <button type="submit" class="button button-primary"><?php esc_html_e('Activate License', 'tka-cookie-consent'); ?></button>
+                    <?php endif; ?>
+                </form>
+            </div>
+
+            <?php if ($is_active): ?>
             <form action="options.php" method="post">
                 <?php
                 settings_fields($this->option_name);
@@ -363,6 +471,11 @@ class AdminSettings
             </p>
             
             <div id="tka-scan-results" style="margin-top: 20px; max-width: 900px;"></div>
+            <?php else: ?>
+                <div class="notice notice-warning inline">
+                    <p><?php esc_html_e('Please activate your license to configure the Cookie Consent settings.', 'tka-cookie-consent'); ?></p>
+                </div>
+            <?php endif; ?>
         </div>
         <?php
     }
