@@ -130,14 +130,16 @@
         });
 
         // Reject All
-        btnReject.addEventListener('click', function() {
-            window.wp_set_consent('functional', 'allow');
-            window.wp_set_consent('preferences', 'deny');
-            window.wp_set_consent('statistics', 'deny');
-            window.wp_set_consent('marketing', 'deny');
+        if (btnReject) {
+            btnReject.addEventListener('click', function() {
+                window.wp_set_consent('functional', 'allow');
+                window.wp_set_consent('preferences', 'deny');
+                window.wp_set_consent('statistics', 'deny');
+                window.wp_set_consent('marketing', 'deny');
 
-            banner.classList.add('tka-hidden');
-        });
+                banner.classList.add('tka-hidden');
+            });
+        }
 
         // Customize Preferences Toggle
         btnCustomize.addEventListener('click', function() {
@@ -146,19 +148,19 @@
             // Toggle visibility of action buttons
             if (prefsPanel.classList.contains('tka-hidden')) {
                 btnAccept.classList.remove('tka-hidden');
-                btnReject.classList.remove('tka-hidden');
+                if (btnReject) btnReject.classList.remove('tka-hidden');
                 btnSave.classList.add('tka-hidden');
                 btnCustomize.textContent = btnCustomize.getAttribute('data-default-label') || 'Customize';
             } else {
                 btnAccept.classList.add('tka-hidden');
-                btnReject.classList.add('tka-hidden');
+                if (btnReject) btnReject.classList.add('tka-hidden');
                 btnSave.classList.remove('tka-hidden');
                 
                 // Store default label and rename button
                 if (!btnCustomize.getAttribute('data-default-label')) {
                     btnCustomize.setAttribute('data-default-label', btnCustomize.textContent);
                 }
-                btnCustomize.textContent = 'Back';
+                btnCustomize.textContent = (window.tkaConsentSettings && window.tkaConsentSettings.labels && window.tkaConsentSettings.labels.back) || 'Back';
 
                 // Pre-fill checkboxes based on current cookies
                 chkPref.checked = window.wp_has_consent('preferences');
@@ -185,6 +187,33 @@
             if (chkMktg.checked) unlockScripts('marketing');
 
             banner.classList.add('tka-hidden');
+        });
+
+        function showSettingsPanel() {
+            banner.classList.remove('tka-hidden');
+            prefsPanel.classList.remove('tka-hidden');
+            btnAccept.classList.add('tka-hidden');
+            if (btnReject) btnReject.classList.add('tka-hidden');
+            btnSave.classList.remove('tka-hidden');
+            
+            if (!btnCustomize.getAttribute('data-default-label')) {
+                btnCustomize.setAttribute('data-default-label', btnCustomize.textContent);
+            }
+            btnCustomize.textContent = (window.tkaConsentSettings && window.tkaConsentSettings.labels && window.tkaConsentSettings.labels.back) || 'Back';
+
+            chkPref.checked = window.wp_has_consent('preferences');
+            chkStats.checked = window.wp_has_consent('statistics');
+            chkMktg.checked = window.wp_has_consent('marketing');
+        }
+
+        window.tkaShowConsentSettings = showSettingsPanel;
+
+        document.addEventListener('click', function(e) {
+            const target = e.target.closest('.tka-cookie-settings-toggle, a[href="#tka-cookie-settings"]');
+            if (target) {
+                e.preventDefault();
+                showSettingsPanel();
+            }
         });
     });
 })();

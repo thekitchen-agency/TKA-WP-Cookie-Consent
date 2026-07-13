@@ -82,8 +82,11 @@ class Plugin
         // Localize options for Javascript
         $settings = get_option('tka_cookie_consent_options', []);
         wp_localize_script('tka-cookie-consent-banner', 'tkaConsentSettings', [
-            'ajaxUrl'   => admin_url('admin-ajax.php'),
-            'categories' => ['functional', 'statistics', 'marketing', 'preferences']
+            'ajaxUrl'    => admin_url('admin-ajax.php'),
+            'categories' => ['functional', 'statistics', 'marketing', 'preferences'],
+            'labels'     => [
+                'back' => __('Back', 'tka-cookie-consent'),
+            ]
         ]);
     }
 
@@ -207,7 +210,9 @@ class Plugin
 
                 <div class="tka-cb-actions">
                     <button type="button" id="tka-cb-btn-accept" class="tka-cb-btn tka-cb-btn-primary"><?php echo esc_html($btn_accept); ?></button>
-                    <button type="button" id="tka-cb-btn-reject" class="tka-cb-btn tka-cb-btn-secondary"><?php echo esc_html($btn_reject); ?></button>
+                    <?php if (!empty($btn_reject)) : ?>
+                        <button type="button" id="tka-cb-btn-reject" class="tka-cb-btn tka-cb-btn-secondary"><?php echo esc_html($btn_reject); ?></button>
+                    <?php endif; ?>
                     <button type="button" id="tka-cb-btn-customize" class="tka-cb-btn tka-cb-btn-link"><?php echo esc_html($btn_customize); ?></button>
                     <button type="button" id="tka-cb-btn-save" class="tka-cb-btn tka-cb-btn-primary tka-hidden"><?php esc_html_e('Save Preferences', 'tka-cookie-consent'); ?></button>
                 </div>

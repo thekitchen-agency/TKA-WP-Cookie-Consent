@@ -2,14 +2,14 @@
 # This file is distributed under the MIT.
 msgid ""
 msgstr ""
-"Project-Id-Version: TKA Cookie Consent 1.0.0\n"
+"Project-Id-Version: TKA Cookie Consent 1.0.3\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/tka-cookie-consent\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-06-27T23:22:53+02:00\n"
+"POT-Creation-Date: 2026-07-13T19:52:43+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: tka-cookie-consent\n"
@@ -183,66 +183,144 @@ msgstr ""
 msgid "No scripts detected on the homepage."
 msgstr ""
 
-#: includes/AdminSettings.php:357
+#: includes/AdminSettings.php:332
+msgid "Scanning site homepage..."
+msgstr ""
+
+#: includes/AdminSettings.php:333
+#, php-format
+msgid "Scan failed: %s"
+msgstr ""
+
+#: includes/AdminSettings.php:334
+msgid "Unknown error"
+msgstr ""
+
+#: includes/AdminSettings.php:335
+msgid "External"
+msgstr ""
+
+#: includes/AdminSettings.php:336
+msgid "Inline"
+msgstr ""
+
+#: includes/AdminSettings.php:337
+#: includes/Plugin.php:286
+msgid "Inline Script"
+msgstr ""
+
+#: includes/AdminSettings.php:338
+msgid "No signature detected"
+msgstr ""
+
+#: includes/AdminSettings.php:396
+msgid "License activated successfully."
+msgstr ""
+
+#: includes/AdminSettings.php:399
+msgid "Failed to activate license."
+msgstr ""
+
+#: includes/AdminSettings.php:412
+msgid "License deactivated locally."
+msgstr ""
+
+#: includes/AdminSettings.php:433
+msgid "Licensing"
+msgstr ""
+
+#: includes/AdminSettings.php:435
+msgid "Local development bypass active."
+msgstr ""
+
+#: includes/AdminSettings.php:436
+msgid "Plugin features are unlocked for local development. You can activate a valid license key below to receive updates."
+msgstr ""
+
+#: includes/AdminSettings.php:438
+msgid "License is active and verified."
+msgstr ""
+
+#: includes/AdminSettings.php:440
+msgid "Your license is suspended or invalid."
+msgstr ""
+
+#: includes/AdminSettings.php:442
+msgid "Please enter your license key to activate the plugin features."
+msgstr ""
+
+#: includes/AdminSettings.php:453
+msgid "Deactivate License"
+msgstr ""
+
+#: includes/AdminSettings.php:456
+msgid "Activate License"
+msgstr ""
+
+#: includes/AdminSettings.php:472
 msgid "Script Scanner"
 msgstr ""
 
-#: includes/AdminSettings.php:358
+#: includes/AdminSettings.php:473
 msgid "Scan the homepage of your website to discover loaded scripts and add them to the blocking lists."
 msgstr ""
 
-#: includes/AdminSettings.php:361
+#: includes/AdminSettings.php:476
 msgid "Scan Homepage"
 msgstr ""
 
-#: includes/Plugin.php:163
+#: includes/AdminSettings.php:483
+msgid "Please activate your license to configure the Cookie Consent settings."
+msgstr ""
+
+#: includes/Plugin.php:88
+msgid "Back"
+msgstr ""
+
+#: includes/Plugin.php:174
 msgid "Read our Privacy Policy"
 msgstr ""
 
-#: includes/Plugin.php:172
+#: includes/Plugin.php:183
 msgid "Strictly Necessary"
 msgstr ""
 
-#: includes/Plugin.php:173
+#: includes/Plugin.php:184
 msgid "Required for the site to function properly."
 msgstr ""
 
-#: includes/Plugin.php:179
+#: includes/Plugin.php:190
 msgid "Preferences"
 msgstr ""
 
-#: includes/Plugin.php:180
+#: includes/Plugin.php:191
 msgid "Remember your preferences and settings."
 msgstr ""
 
-#: includes/Plugin.php:186
+#: includes/Plugin.php:197
 msgid "Statistics"
 msgstr ""
 
-#: includes/Plugin.php:187
+#: includes/Plugin.php:198
 msgid "Help us understand how you interact with our site."
 msgstr ""
 
-#: includes/Plugin.php:193
+#: includes/Plugin.php:204
 msgid "Marketing"
 msgstr ""
 
-#: includes/Plugin.php:194
+#: includes/Plugin.php:205
 msgid "Used to deliver personalized ads and content."
 msgstr ""
 
-#: includes/Plugin.php:204
+#: includes/Plugin.php:217
 msgid "Save Preferences"
 msgstr ""
 
-#: includes/Plugin.php:217
+#: includes/Plugin.php:230
 msgid "Unauthorized"
 msgstr ""
 
-#: includes/Plugin.php:232
+#: includes/Plugin.php:245
 msgid "Empty response from site homepage."
-msgstr ""
-
-#: includes/Plugin.php:273
-msgid "Inline Script"
 msgstr ""

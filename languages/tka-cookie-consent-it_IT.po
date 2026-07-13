@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: TKA Cookie Consent 1.0.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/tka-cookie-"
 "consent\n"
-"POT-Creation-Date: 2026-06-27T23:22:53+02:00\n"
+"POT-Creation-Date: 2026-07-13T19:52:43+00:00\n"
 "PO-Revision-Date: 2026-06-27T23:10:00+02:00\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: Italian\n"
@@ -218,11 +218,88 @@ msgstr "Già bloccato"
 msgid "No scripts detected on the homepage."
 msgstr "Nessuno script rilevato nella home page."
 
-#: includes/AdminSettings.php:357
+#: includes/AdminSettings.php:332
+#, fuzzy
+msgid "Scanning site homepage..."
+msgstr "Scansiona la home page"
+
+#: includes/AdminSettings.php:333
+#, php-format
+msgid "Scan failed: %s"
+msgstr ""
+
+#: includes/AdminSettings.php:334
+msgid "Unknown error"
+msgstr ""
+
+#: includes/AdminSettings.php:335
+msgid "External"
+msgstr ""
+
+#: includes/AdminSettings.php:336
+#, fuzzy
+msgid "Inline"
+msgstr "Script incorporato"
+
+#: includes/AdminSettings.php:337 includes/Plugin.php:286
+msgid "Inline Script"
+msgstr "Script incorporato"
+
+#: includes/AdminSettings.php:338
+msgid "No signature detected"
+msgstr ""
+
+#: includes/AdminSettings.php:396
+msgid "License activated successfully."
+msgstr ""
+
+#: includes/AdminSettings.php:399
+msgid "Failed to activate license."
+msgstr ""
+
+#: includes/AdminSettings.php:412
+msgid "License deactivated locally."
+msgstr ""
+
+#: includes/AdminSettings.php:433
+msgid "Licensing"
+msgstr ""
+
+#: includes/AdminSettings.php:435
+msgid "Local development bypass active."
+msgstr ""
+
+#: includes/AdminSettings.php:436
+msgid ""
+"Plugin features are unlocked for local development. You can activate a valid "
+"license key below to receive updates."
+msgstr ""
+
+#: includes/AdminSettings.php:438
+msgid "License is active and verified."
+msgstr ""
+
+#: includes/AdminSettings.php:440
+msgid "Your license is suspended or invalid."
+msgstr ""
+
+#: includes/AdminSettings.php:442
+msgid "Please enter your license key to activate the plugin features."
+msgstr ""
+
+#: includes/AdminSettings.php:453
+msgid "Deactivate License"
+msgstr ""
+
+#: includes/AdminSettings.php:456
+msgid "Activate License"
+msgstr ""
+
+#: includes/AdminSettings.php:472
 msgid "Script Scanner"
 msgstr "Scanner di script"
 
-#: includes/AdminSettings.php:358
+#: includes/AdminSettings.php:473
 msgid ""
 "Scan the homepage of your website to discover loaded scripts and add them to "
 "the blocking lists."
@@ -230,58 +307,62 @@ msgstr ""
 "Scansiona la home page del tuo sito web per scoprire gli script caricati e "
 "aggiungerli agli elenchi di blocco."
 
-#: includes/AdminSettings.php:361
+#: includes/AdminSettings.php:476
 msgid "Scan Homepage"
 msgstr "Scansiona la home page"
 
-#: includes/Plugin.php:163
+#: includes/AdminSettings.php:483
+msgid "Please activate your license to configure the Cookie Consent settings."
+msgstr ""
+
+#: includes/Plugin.php:88
+msgid "Back"
+msgstr "Indietro"
+
+#: includes/Plugin.php:174
 msgid "Read our Privacy Policy"
 msgstr "Leggi la nostra Informativa sulla privacy"
 
-#: includes/Plugin.php:172
+#: includes/Plugin.php:183
 msgid "Strictly Necessary"
 msgstr "Strettamente necessari"
 
-#: includes/Plugin.php:173
+#: includes/Plugin.php:184
 msgid "Required for the site to function properly."
 msgstr "Richiesti per il corretto funzionamento del sito."
 
-#: includes/Plugin.php:179
+#: includes/Plugin.php:190
 msgid "Preferences"
 msgstr "Preferenze"
 
-#: includes/Plugin.php:180
+#: includes/Plugin.php:191
 msgid "Remember your preferences and settings."
 msgstr "Ricorda le tue preferenze e impostazioni."
 
-#: includes/Plugin.php:186
+#: includes/Plugin.php:197
 msgid "Statistics"
 msgstr "Statistiche"
 
-#: includes/Plugin.php:187
+#: includes/Plugin.php:198
 msgid "Help us understand how you interact with our site."
 msgstr "Aiutaci a capire come interagisci con il nostro sito."
 
-#: includes/Plugin.php:193
+#: includes/Plugin.php:204
 msgid "Marketing"
 msgstr "Marketing"
 
-#: includes/Plugin.php:194
+#: includes/Plugin.php:205
 msgid "Used to deliver personalized ads and content."
 msgstr "Utilizzati per fornire annunci e contenuti personalizzati."
 
-#: includes/Plugin.php:204
+#: includes/Plugin.php:217
 msgid "Save Preferences"
 msgstr "Salva preferenze"
 
-#: includes/Plugin.php:217
+#: includes/Plugin.php:230
 msgid "Unauthorized"
 msgstr "Non autorizzato"
 
-#: includes/Plugin.php:232
+#: includes/Plugin.php:245
 msgid "Empty response from site homepage."
 msgstr "Risposta vuota dalla home page del sito."
-
-#: includes/Plugin.php:273
-msgid "Inline Script"
-msgstr "Script incorporato"

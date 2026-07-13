@@ -10,7 +10,7 @@ jQuery(document).ready(function($) {
     $btn.on('click', function() {
         $btn.prop('disabled', true);
         $loader.show();
-        $results.html('<p>Scanning site homepage...</p>');
+        $results.html('<p>' + tkaConsentAdmin.labels.scanning + '</p>');
 
         $.post(tkaConsentAdmin.ajaxUrl, {
             action: 'tka_scan_scripts',
@@ -21,7 +21,8 @@ jQuery(document).ready(function($) {
             $btn.prop('disabled', false);
 
             if (!response.success) {
-                $results.html('<div class="notice notice-error inline"><p>Scan failed: ' + (response.data.message || 'Unknown error') + '</p></div>');
+                var errorMsg = tkaConsentAdmin.labels.scanFailed.replace('%s', response.data.message || tkaConsentAdmin.labels.unknownError);
+                $results.html('<div class="notice notice-error inline"><p>' + errorMsg + '</p></div>');
                 return;
             }
 
@@ -36,7 +37,8 @@ jQuery(document).ready(function($) {
         .fail(function(xhr, status, error) {
             $loader.hide();
             $btn.prop('disabled', false);
-            $results.html('<div class="notice notice-error inline"><p>Scan failed: ' + error + '</p></div>');
+            var errorMsg = tkaConsentAdmin.labels.scanFailed.replace('%s', error);
+            $results.html('<div class="notice notice-error inline"><p>' + errorMsg + '</p></div>');
         });
     });
 
@@ -73,12 +75,12 @@ jQuery(document).ready(function($) {
         html += '<tbody>';
 
         scripts.forEach(function(script, index) {
-            var typeBadge = script.type === 'external' ? 'External' : 'Inline';
+            var typeBadge = script.type === 'external' ? labels.external : labels.inline;
             var displayContent = '';
             if (script.type === 'external') {
                 displayContent = '<code>' + script.src + '</code>';
             } else {
-                displayContent = '<strong>Inline Script</strong><pre style="margin:5px 0; font-size:11px; background:#f6f7f7; padding:5px; border:1px solid #dcdcde; overflow:auto;">' + script.preview + '</pre>';
+                displayContent = '<strong>' + labels.inlineScript + '</strong><pre style="margin:5px 0; font-size:11px; background:#f6f7f7; padding:5px; border:1px solid #dcdcde; overflow:auto;">' + script.preview + '</pre>';
             }
 
             var categoryLabel = script.suggested_category.charAt(0).toUpperCase() + script.suggested_category.slice(1);
@@ -92,7 +94,7 @@ jQuery(document).ready(function($) {
             if (script.is_blocked) {
                 actionsHtml = '<span class="description">' + labels.alreadyBlocked + '</span>';
             } else if (!signature) {
-                actionsHtml = '<span class="description">No signature detected</span>';
+                actionsHtml = '<span class="description">' + labels.noSignature + '</span>';
             } else {
                 var categories = ['statistics', 'marketing', 'preferences'];
                 categories.forEach(function(cat) {

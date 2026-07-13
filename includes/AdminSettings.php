@@ -329,6 +329,13 @@ class AdminSettings
                 'blockAs' => __('Block as %s', 'tka-cookie-consent'),
                 'alreadyBlocked' => __('Already Blocked', 'tka-cookie-consent'),
                 'noScripts' => __('No scripts detected on the homepage.', 'tka-cookie-consent'),
+                'scanning' => __('Scanning site homepage...', 'tka-cookie-consent'),
+                'scanFailed' => __('Scan failed: %s', 'tka-cookie-consent'),
+                'unknownError' => __('Unknown error', 'tka-cookie-consent'),
+                'external' => __('External', 'tka-cookie-consent'),
+                'inline' => __('Inline', 'tka-cookie-consent'),
+                'inlineScript' => __('Inline Script', 'tka-cookie-consent'),
+                'noSignature' => __('No signature detected', 'tka-cookie-consent'),
             ]
         ]);
     }
