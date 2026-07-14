@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       TKA Cookie Consent
  * Description:       A lightweight, modern cookie consent plugin compatible with the WP Consent API standard.
- * Version:           1.0.3
+ * Version:           1.0.4
  * Author:            TKA
  * Author URI:        https://wp-play.ddev.site
  * License:           MIT
