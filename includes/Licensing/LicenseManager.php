@@ -3,7 +3,7 @@
 namespace Tka\CookieConsent\Licensing;
 
 /**
- * TKA License Manager Client
+ * TKA License Manager Client for Cookie Consent
  * Handles communication with the licensing server.
  */
 class LicenseManager
@@ -13,16 +13,51 @@ class LicenseManager
 	private string $productRef;
 	private string $domain;
 
-	public function __construct(string $serverUrl, string $licenseKey, string $productRef)
+	public function __construct(string $serverUrl, string $licenseKey, string $productRef, ?string $domain = null)
 	{
-		$this->serverUrl = rtrim($serverUrl, '/');
+		$this->serverUrl  = rtrim($serverUrl, '/');
 		$this->licenseKey = trim($licenseKey);
 		$this->productRef = trim($productRef);
 
-		// Normalize domain
-		$raw_host = isset($_SERVER['HTTP_HOST']) ? sanitize_text_field(wp_unslash($_SERVER['HTTP_HOST'])) : 'localhost';
-		$host = wp_parse_url($raw_host, PHP_URL_HOST);
-		$this->domain = $host ? $host : $raw_host;
+		if (!empty($domain)) {
+			$this->domain = strtolower(trim($domain));
+		} else {
+			$this->domain = self::determineDomain();
+		}
+	}
+
+	/**
+	 * Determine the current site domain.
+	 */
+	public static function determineDomain(): string
+	{
+		$domain = '';
+		if (function_exists('home_url')) {
+			$host = wp_parse_url(home_url(), PHP_URL_HOST);
+			if (!empty($host)) {
+				$domain = $host;
+			}
+		}
+
+		if (empty($domain) && isset($_SERVER['HTTP_HOST'])) {
+			$raw_host = sanitize_text_field(wp_unslash($_SERVER['HTTP_HOST']));
+			$domain = preg_replace('/:\d+$/', '', $raw_host);
+		}
+
+		if (empty($domain) && isset($_SERVER['SERVER_NAME'])) {
+			$domain = sanitize_text_field(wp_unslash($_SERVER['SERVER_NAME']));
+		}
+
+		if (empty($domain)) {
+			$domain = 'localhost';
+		}
+
+		return strtolower(trim($domain));
+	}
+
+	public function getDomain(): string
+	{
+		return $this->domain;
 	}
 
 	/**
@@ -42,6 +77,14 @@ class LicenseManager
 	}
 
 	/**
+	 * Check if domain is on whitelist.
+	 */
+	public function checkWhitelist(): array
+	{
+		return $this->sendRequest('/api/license/verify');
+	}
+
+	/**
 	 * Deactivate domain seat.
 	 */
 	public function deactivate(): array
@@ -50,7 +93,25 @@ class LicenseManager
 	}
 
 	/**
-	 * Internal cURL dispatcher.
+	 * Helper to check if a response indicates a whitelisted domain.
+	 */
+	public static function isWhitelistedResponse(array $response): bool
+	{
+		if (empty($response['success'])) {
+			return false;
+		}
+
+		if (isset($response['status']) && $response['status'] === 'active') {
+			if (!empty($response['message']) && stripos($response['message'], 'whitelisted') !== false) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Internal HTTP dispatcher.
 	 */
 	private function sendRequest(string $endpoint): array
 	{

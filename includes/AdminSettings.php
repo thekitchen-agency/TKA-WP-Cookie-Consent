@@ -380,43 +380,67 @@ class AdminSettings
             $action = isset($_POST['tka_license_action_type']) ? sanitize_text_field(wp_unslash($_POST['tka_license_action_type'])) : '';
             $license_key = isset($_POST['tka_license_key']) ? sanitize_text_field(wp_unslash($_POST['tka_license_key'])) : '';
 
-            if ($action === 'activate' && !empty($license_key)) {
-                $manager = new \Tka\CookieConsent\Licensing\LicenseManager($server_url, $license_key, 'tka-cookie-consent');
-                $result = $manager->activate();
-
-                if (isset($result['success']) && $result['success']) {
-                    $status = [
-                        'license_key' => $license_key,
-                        'status' => 'active',
-                        'last_check' => time(),
-                        'grace_active' => false
-                    ];
-                    update_option('tka_cookie_consent_license_status', $status);
-                    set_transient('tka_cookie_consent_license_check_transient', 'active', 24 * HOUR_IN_SECONDS);
-                    $message = __('License activated successfully.', 'tka-cookie-consent');
+            if ($action === 'check_update') {
+                $check = \Tka\CookieConsent\Licensing\Licensing::forceCheckUpdate();
+                if (!empty($check['has_update'])) {
+                    $message = sprintf(__('Update available! Version %s is ready to install.', 'tka-cookie-consent'), $check['new_version']);
+                    $message_type = 'updated';
+                } elseif (!empty($check['success'])) {
+                    $message = sprintf(__('You are running the latest version (%s).', 'tka-cookie-consent'), $check['current_version'] ?? (defined('TKA_COOKIE_CONSENT_VERSION') ? TKA_COOKIE_CONSENT_VERSION : '0.0.0'));
                     $message_type = 'updated';
                 } else {
-                    $message = $result['error'] ?? __('Failed to activate license.', 'tka-cookie-consent');
+                    $message = $check['error'] ?? __('Failed to check for updates.', 'tka-cookie-consent');
                     $message_type = 'error';
                 }
-            } elseif ($action === 'deactivate') {
-                if (!empty($status['license_key'])) {
-                    $manager = new \Tka\CookieConsent\Licensing\LicenseManager($server_url, $status['license_key'], 'tka-cookie-consent');
-                    $manager->deactivate();
+            } elseif ($action === 'activate' && !empty($license_key)) {
+                if (\Tka\CookieConsent\Licensing\Licensing::isLicenseKeyFromEnv()) {
+                    $message = __('License key is managed via .env.', 'tka-cookie-consent');
+                    $message_type = 'error';
+                } else {
+                    $manager = new \Tka\CookieConsent\Licensing\LicenseManager($server_url, $license_key, 'tka-cookie-consent');
+                    $result = $manager->activate();
+
+                    if (isset($result['success']) && $result['success']) {
+                        $status = [
+                            'license_key' => $license_key,
+                            'status' => 'active',
+                            'last_check' => time(),
+                            'grace_active' => false
+                        ];
+                        update_option('tka_cookie_consent_license_status', $status);
+                        set_transient('tka_cookie_consent_license_check_transient', 'active', 24 * HOUR_IN_SECONDS);
+                        $message = __('License activated successfully.', 'tka-cookie-consent');
+                        $message_type = 'updated';
+                    } else {
+                        $message = $result['error'] ?? __('Failed to activate license.', 'tka-cookie-consent');
+                        $message_type = 'error';
+                    }
                 }
-                
-                $status = [];
-                update_option('tka_cookie_consent_license_status', $status);
-                delete_transient('tka_cookie_consent_license_check_transient');
-                
-                $message = __('License deactivated locally.', 'tka-cookie-consent');
-                $message_type = 'updated';
+            } elseif ($action === 'deactivate') {
+                if (\Tka\CookieConsent\Licensing\Licensing::isLicenseKeyFromEnv()) {
+                    $message = __('License key is managed via .env.', 'tka-cookie-consent');
+                    $message_type = 'error';
+                } else {
+                    if (!empty($status['license_key'])) {
+                        $manager = new \Tka\CookieConsent\Licensing\LicenseManager($server_url, $status['license_key'], 'tka-cookie-consent');
+                        $manager->deactivate();
+                    }
+                    
+                    $status = [];
+                    update_option('tka_cookie_consent_license_status', $status);
+                    delete_transient('tka_cookie_consent_license_check_transient');
+                    
+                    $message = __('License deactivated locally.', 'tka-cookie-consent');
+                    $message_type = 'updated';
+                }
             }
         }
 
         $is_active = \Tka\CookieConsent\Licensing\Licensing::isActive();
         $is_local = \Tka\CookieConsent\Licensing\Licensing::isLocalEnvironment();
-        $current_key = $status['license_key'] ?? '';
+        $is_env = \Tka\CookieConsent\Licensing\Licensing::isLicenseKeyFromEnv();
+        $is_whitelisted = \Tka\CookieConsent\Licensing\Licensing::isDomainWhitelisted();
+        $current_key = \Tka\CookieConsent\Licensing\Licensing::getActiveLicenseKey();
         $error_message = $status['error_message'] ?? '';
         ?>
         <div class="wrap">
@@ -429,11 +453,16 @@ class AdminSettings
             <?php endif; ?>
 
             <!-- Licensing Box -->
-            <div class="card" style="max-width: 900px; margin-bottom: 20px; padding: 15px; border-left: 4px solid <?php echo $is_active ? '#22c55e' : '#f59e0b'; ?>;">
+            <div class="card" style="max-width: 900px; margin-bottom: 20px; padding: 15px; border-left: 4px solid <?php echo ($is_active || $is_whitelisted) ? '#22c55e' : '#f59e0b'; ?>;">
                 <h2><?php esc_html_e('Licensing', 'tka-cookie-consent'); ?></h2>
                 <?php if ($is_local): ?>
                     <p style="color: #22c55e; font-weight: bold; margin-bottom: 5px;"><?php esc_html_e('Local development bypass active.', 'tka-cookie-consent'); ?></p>
                     <p style="font-size: 13px; color: #646970; margin-top: 0; margin-bottom: 15px;"><?php esc_html_e('Plugin features are unlocked for local development. You can activate a valid license key below to receive updates.', 'tka-cookie-consent'); ?></p>
+                <?php elseif ($is_whitelisted): ?>
+                    <p style="color: #22c55e; font-weight: bold; margin-bottom: 5px;">
+                        <span class="dashicons dashicons-shield-alt" style="color: #22c55e; vertical-align: middle;"></span>
+                        <?php esc_html_e('Domain is Whitelisted on License Server.', 'tka-cookie-consent'); ?>
+                    </p>
                 <?php elseif ($is_active): ?>
                     <p style="color: #22c55e; font-weight: bold;"><?php esc_html_e('License is active and verified.', 'tka-cookie-consent'); ?></p>
                 <?php elseif (!empty($status['status']) && $status['status'] === 'suspended'): ?>
@@ -442,20 +471,39 @@ class AdminSettings
                     <p><?php esc_html_e('Please enter your license key to activate the plugin features.', 'tka-cookie-consent'); ?></p>
                 <?php endif; ?>
 
+                <?php if ($is_env): ?>
+                    <div style="margin-bottom: 12px; font-size: 12px; background: #f0fdf4; border: 1px solid #bbf7d0; padding: 6px 10px; border-radius: 4px; display: inline-flex; align-items: center; gap: 6px; color: #166534;">
+                        <span class="dashicons dashicons-lock" style="font-size: 14px; width: 14px; height: 14px;"></span>
+                        <?php esc_html_e('Configured via .env / environment variable', 'tka-cookie-consent'); ?>
+                    </div>
+                <?php endif; ?>
+
                 <?php
                 $is_really_active = !empty($status['status']) && $status['status'] === 'active';
                 ?>
                 <form method="post" action="">
                     <?php wp_nonce_field('tka_license_action', 'tka_license_nonce'); ?>
-                    <input type="text" name="tka_license_key" value="<?php echo esc_attr($current_key); ?>" class="regular-text" <?php echo $is_really_active ? 'readonly' : ''; ?> />
-                    <?php if ($is_really_active): ?>
+                    <input type="text" name="tka_license_key" value="<?php echo esc_attr($current_key); ?>" class="regular-text" <?php echo ($is_env || ($is_really_active && !$is_local)) ? 'readonly' : ''; ?> />
+                    <?php if (!$is_env && $is_really_active && !$is_local): ?>
                         <input type="hidden" name="tka_license_action_type" value="deactivate">
                         <button type="submit" class="button button-link-delete" style="color: #ef4444;"><?php esc_html_e('Deactivate License', 'tka-cookie-consent'); ?></button>
-                    <?php else: ?>
+                    <?php elseif (!$is_env): ?>
                         <input type="hidden" name="tka_license_action_type" value="activate">
                         <button type="submit" class="button button-primary"><?php esc_html_e('Activate License', 'tka-cookie-consent'); ?></button>
                     <?php endif; ?>
                 </form>
+
+                <?php if ($is_active || $is_whitelisted): ?>
+                    <hr style="margin: 20px 0; border: 0; border-top: 1px solid #e2e8f0;">
+                    <form method="post" action="">
+                        <?php wp_nonce_field('tka_license_action', 'tka_license_nonce'); ?>
+                        <input type="hidden" name="tka_license_action_type" value="check_update">
+                        <button type="submit" class="button button-secondary" style="display: inline-flex; align-items: center; gap: 4px;">
+                            <span class="dashicons dashicons-update"></span>
+                            <?php esc_html_e('Check for Updates Now', 'tka-cookie-consent'); ?>
+                        </button>
+                    </form>
+                <?php endif; ?>
             </div>
 
             <?php if ($is_active): ?>
