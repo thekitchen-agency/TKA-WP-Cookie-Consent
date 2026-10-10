@@ -43,7 +43,7 @@ jQuery(document).ready(function($) {
     });
 
     function getSignature(script) {
-        if (script.type === 'external') {
+        if (script.type === 'external' || script.type === 'iframe') {
             try {
                 var url = new URL(script.src);
                 return url.hostname.replace('www.', '');
@@ -75,10 +75,10 @@ jQuery(document).ready(function($) {
         html += '<tbody>';
 
         scripts.forEach(function(script, index) {
-            var typeBadge = script.type === 'external' ? labels.external : labels.inline;
+            var typeBadge = script.type === 'external' ? labels.external : (script.type === 'iframe' ? 'Iframe' : labels.inline);
             var displayContent = '';
-            if (script.type === 'external') {
-                displayContent = '<code>' + script.src + '</code>';
+            if (script.type === 'external' || script.type === 'iframe') {
+                displayContent = '<strong>' + (script.name || '') + '</strong><br><code>' + script.src + '</code>';
             } else {
                 displayContent = '<strong>' + labels.inlineScript + '</strong><pre style="margin:5px 0; font-size:11px; background:#f6f7f7; padding:5px; border:1px solid #dcdcde; overflow:auto;">' + script.preview + '</pre>';
             }

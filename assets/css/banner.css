@@ -248,3 +248,126 @@
     box-sizing: border-box;
   }
 }
+
+/* --- Third-Party Iframe Blocker Placeholder --- */
+.tka-iframe-placeholder {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 280px;
+  background: #111317;
+  background: radial-gradient(circle at 50% 50%, #1e2229 0%, #0d0f12 100%);
+  border-radius: var(--tka-cb-border-radius, 12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  box-sizing: border-box;
+  padding: 30px 20px;
+  color: #fff;
+  font-family: var(--tka-cb-font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+  text-align: center;
+  margin: 15px 0;
+}
+
+.tka-iframe-placeholder iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.tka-iframe-placeholder.tka-iframe-unlocked {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  min-height: auto;
+}
+
+.tka-iframe-placeholder.tka-iframe-unlocked .tka-iframe-placeholder-content {
+  display: none !important;
+}
+
+.tka-iframe-placeholder.tka-iframe-unlocked iframe {
+  position: relative;
+  visibility: visible;
+  opacity: 1;
+}
+
+.tka-iframe-placeholder-content {
+  position: relative;
+  z-index: 2;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.tka-iframe-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--tka-cb-primary-color, #FF4B67);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 4px;
+}
+
+.tka-iframe-text {
+  font-size: 15px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.tka-iframe-text strong {
+  color: #fff;
+}
+
+.tka-iframe-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.tka-iframe-unlock-btn {
+  background: var(--tka-cb-primary-color, #FF4B67);
+  color: #fff;
+  border: none;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 10px 22px;
+  border-radius: var(--tka-cb-border-radius-button, 8px);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+}
+
+.tka-iframe-unlock-btn:hover {
+  background: var(--tka-cb-primary-color-hover, #e03c56);
+  transform: translateY(-1px);
+}
+
+.tka-iframe-settings-link {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  text-decoration: underline;
+  transition: color 0.2s ease;
+}
+
+.tka-iframe-settings-link:hover {
+  color: #fff;
+}
+

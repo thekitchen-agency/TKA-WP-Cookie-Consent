@@ -6,6 +6,7 @@ class Plugin
 {
     private static $instance = null;
     private $admin_settings = null;
+    private $html_blocker = null;
 
     /**
      * Singleton instance access.
@@ -42,7 +43,29 @@ class Plugin
             return;
         }
 
-        // Script tag interceptor to block cookies before consent
+        // Initialize Zero-Code HTML Output Buffer Blocker
+        $enable_html_blocker = $this->admin_settings->get_option('enable_html_blocker', '1') === '1';
+        $enable_iframe_blocker = $this->admin_settings->get_option('enable_iframe_blocker', '1') === '1';
+
+        $custom_signatures = [
+            'statistics'  => array_filter(array_map('trim', explode(',', $this->admin_settings->get_option('blocked_statistics', '')))),
+            'marketing'   => array_filter(array_map('trim', explode(',', $this->admin_settings->get_option('blocked_marketing', '')))),
+            'preferences' => array_filter(array_map('trim', explode(',', $this->admin_settings->get_option('blocked_preferences', '')))),
+        ];
+
+        $this->html_blocker = new \Tka\CookieConsent\Blocker\HtmlBlocker(
+            $enable_html_blocker,
+            $enable_iframe_blocker,
+            $custom_signatures
+        );
+        $this->html_blocker->init();
+
+        // Inject Google Consent Mode v2 defaults early in <head>
+        if ($this->admin_settings->get_option('enable_consent_mode', '1') === '1') {
+            add_action('wp_head', [$this, 'inject_google_consent_mode_defaults'], 1);
+        }
+
+        // Script tag interceptor to block cookies before consent (additional fallback)
         add_filter('script_loader_tag', [$this, 'block_scripts'], 999, 3);
 
         // Enqueue frontend scripts & styles
@@ -82,9 +105,10 @@ class Plugin
         // Localize options for Javascript
         $settings = get_option('tka_cookie_consent_options', []);
         wp_localize_script('tka-cookie-consent-banner', 'tkaConsentSettings', [
-            'ajaxUrl'    => admin_url('admin-ajax.php'),
-            'categories' => ['functional', 'statistics', 'marketing', 'preferences'],
-            'labels'     => [
+            'ajaxUrl'           => admin_url('admin-ajax.php'),
+            'categories'        => ['functional', 'statistics', 'marketing', 'preferences'],
+            'enableConsentMode' => ($this->admin_settings->get_option('enable_consent_mode', '1') === '1'),
+            'labels'            => [
                 'back' => __('Back', 'tka-cookie-consent'),
             ]
         ]);
@@ -99,29 +123,28 @@ class Plugin
             return $tag;
         }
 
-        // Define mapping of category to setting key
-        $categories = [
-            'statistics'  => 'blocked_statistics',
-            'marketing'   => 'blocked_marketing',
-            'preferences' => 'blocked_preferences',
+        // Avoid double rewriting if HtmlBlocker already rewrote it
+        if (strpos($tag, 'data-tka-script') !== false || strpos($tag, 'data-consent-category') !== false || strpos($tag, 'data-tka-category') !== false) {
+            return $tag;
+        }
+
+        $custom_signatures = [
+            'statistics'  => array_filter(array_map('trim', explode(',', $this->admin_settings->get_option('blocked_statistics', '')))),
+            'marketing'   => array_filter(array_map('trim', explode(',', $this->admin_settings->get_option('blocked_marketing', '')))),
+            'preferences' => array_filter(array_map('trim', explode(',', $this->admin_settings->get_option('blocked_preferences', '')))),
         ];
 
+        $compiled = \Tka\CookieConsent\Services\ServiceRegistry::get_compiled_signatures($custom_signatures);
         $matched_category = null;
 
-        foreach ($categories as $category => $option_key) {
-            $blocked_input = $this->admin_settings->get_option($option_key, '');
-            if (empty($blocked_input)) {
-                continue;
-            }
-
-            $signatures = array_map('trim', explode(',', $blocked_input));
+        foreach ($compiled as $category => $signatures) {
             foreach ($signatures as $sig) {
                 if (empty($sig)) {
                     continue;
                 }
                 if (stripos($src, $sig) !== false || stripos($handle, $sig) !== false) {
                     $matched_category = $category;
-                    break 2; // Break both loops
+                    break 2;
                 }
             }
         }
@@ -132,16 +155,16 @@ class Plugin
                 return $tag;
             }
 
-            // Replace src with data-src
+            // Replace src with data-tka-src and data-src
             if (preg_match('/src=["\']([^"\']+)["\']/', $tag, $matches)) {
-                $tag = str_replace($matches[0], 'data-src="' . esc_url($matches[1]) . '"', $tag);
+                $tag = str_replace($matches[0], 'data-tka-src="' . esc_url($matches[1]) . '" data-src="' . esc_url($matches[1]) . '"', $tag);
             }
 
             // Remove any existing type attribute
             $tag = preg_replace('/type=["\']([^"\']+)["\']/', '', $tag);
 
-            // Set type to text/plain and inject the data attribute
-            $tag = preg_replace('/<script\b/', '<script type="text/plain" data-consent-category="' . esc_attr($matched_category) . '"', $tag);
+            // Set type to text/plain and inject data attributes
+            $tag = preg_replace('/<script\b/', '<script type="text/plain" data-tka-category="' . esc_attr($matched_category) . '" data-consent-category="' . esc_attr($matched_category) . '" data-tka-script', $tag);
         }
 
         return $tag;
@@ -160,7 +183,7 @@ class Plugin
         $text  = __($this->admin_settings->get_option('banner_text', 'We use cookies to enhance your browsing experience, serve personalized ads or content, and analyze our traffic. By clicking "Accept All", you consent to our use of cookies.'), 'tka-cookie-consent');
         $btn_accept = __($this->admin_settings->get_option('btn_accept', 'Accept All'), 'tka-cookie-consent');
         $btn_reject = __($this->admin_settings->get_option('btn_reject', 'Reject All'), 'tka-cookie-consent');
-        $btn_customize = __($this->admin_settings->get_option('btn_customize', 'Customize'), 'tka-cookie-consent');
+        $btn_customize = __($this->admin_settings->get_option('btn_customize', 'Cookie Preferences'), 'tka-cookie-consent');
         $policy_url = get_privacy_policy_url();
         
         ?>
@@ -170,7 +193,7 @@ class Plugin
                     <h3 id="tka-cb-title"><?php echo esc_html($title); ?></h3>
                     <p class="tka-cb-text">
                         <?php echo wp_kses_post($text); ?>
-                        <?php if ($policy_url) : ?>
+                        <?php if ($policy_url && stripos($text, 'policy') === false && stripos($text, 'datenschutz') === false) : ?>
                             <a href="<?php echo esc_url($policy_url); ?>" class="tka-cb-policy-link" target="_blank" rel="noopener noreferrer"><?php esc_html_e('Read our Privacy Policy', 'tka-cookie-consent'); ?></a>
                         <?php endif; ?>
                     </p>
@@ -324,7 +347,82 @@ class Plugin
             ];
         }
 
+        // Also scan iframes for third-party embeds (YouTube, Vimeo, Google Maps, etc.)
+        $iframe_elements = $dom->getElementsByTagName('iframe');
+        foreach ($iframe_elements as $element) {
+            $src = $element->getAttribute('src');
+            if (empty($src) || $src === 'about:blank') {
+                continue;
+            }
+
+            $service = \Tka\CookieConsent\Services\ServiceRegistry::match_service($src);
+            $service_name = $service ? $service['name'] : __('External Embed', 'tka-cookie-consent');
+            $suggested_category = $service ? $service['category'] : 'marketing';
+
+            $is_blocked = false;
+            $current_sigs = array_merge($blocked_stats, $blocked_mktg, $blocked_pref);
+            foreach ($current_sigs as $sig) {
+                if (stripos($src, $sig) !== false) {
+                    $is_blocked = true;
+                    break;
+                }
+            }
+            if ($this->admin_settings->get_option('enable_iframe_blocker', '1') === '1' && $service) {
+                $is_blocked = true;
+            }
+
+            $scripts[] = [
+                'type'               => 'iframe',
+                'src'                => $src,
+                'name'               => $service_name,
+                'preview'            => '',
+                'suggested_category' => $suggested_category,
+                'is_blocked'         => $is_blocked,
+                'full_content'       => $src,
+            ];
+        }
+
         wp_send_json_success(['scripts' => $scripts]);
+    }
+
+    /**
+     * Inject Google Consent Mode v2 default configuration in <head>.
+     */
+    public function inject_google_consent_mode_defaults()
+    {
+        if (is_admin()) {
+            return;
+        }
+        ?>
+        <script id="tka-consent-mode-init">
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+
+            (function() {
+                function getCookie(name) {
+                    var match = document.cookie.match(new RegExp('(^|; )' + name + '=([^;]+)'));
+                    return match ? match[2] : null;
+                }
+
+                var hasMarketing = getCookie('wp_consent_marketing') === 'allow';
+                var hasStats = getCookie('wp_consent_statistics') === 'allow';
+                var hasPrefs = getCookie('wp_consent_preferences') === 'allow';
+
+                gtag('consent', 'default', {
+                    'ad_storage': hasMarketing ? 'granted' : 'denied',
+                    'ad_user_data': hasMarketing ? 'granted' : 'denied',
+                    'ad_personalization': hasMarketing ? 'granted' : 'denied',
+                    'analytics_storage': hasStats ? 'granted' : 'denied',
+                    'personalization_storage': hasPrefs ? 'granted' : 'denied',
+                    'functionality_storage': 'granted',
+                    'security_storage': 'granted',
+                    'wait_for_update': 500
+                });
+
+                dataLayer.push({'event': 'tka_consent_default_ready'});
+            })();
+        </script>
+        <?php
     }
 
     /**
@@ -369,14 +467,14 @@ class Plugin
 
             // If it has src="..." or src='...', replace with data-src
             if (preg_match('/src=["\']([^"\']+)["\']/', $attrs, $src_match)) {
-                $attrs = str_replace($src_match[0], 'data-src="' . esc_url($src_match[1]) . '"', $attrs);
+                $attrs = str_replace($src_match[0], 'data-tka-src="' . esc_url($src_match[1]) . '" data-src="' . esc_url($src_match[1]) . '"', $attrs);
             }
 
             // Remove any existing type attribute
             $attrs = preg_replace('/type=["\']([^"\']+)["\']/', '', $attrs);
 
             // Set type to text/plain and inject the data attribute
-            return '<script type="text/plain" data-consent-category="' . esc_attr($category) . '"' . $attrs . '>';
+            return '<script type="text/plain" data-tka-category="' . esc_attr($category) . '" data-consent-category="' . esc_attr($category) . '" data-tka-script' . $attrs . '>';
         }, $html);
     }
 }

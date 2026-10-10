@@ -48,6 +48,64 @@ class AdminSettings
             'sanitize_callback' => [$this, 'sanitize_options']
         ]);
 
+        // Enterprise Automation & Consent Mode v2 section
+        add_settings_section(
+            'tka_cookie_consent_enterprise',
+            __('Enterprise Automation & Consent Mode v2', 'tka-cookie-consent'),
+            [$this, 'render_enterprise_section_intro'],
+            'tka-cookie-consent'
+        );
+
+        add_settings_field(
+            'enable_html_blocker',
+            __('Zero-Code Automatic Blocker', 'tka-cookie-consent'),
+            [$this, 'render_checkbox_field'],
+            'tka-cookie-consent',
+            'tka_cookie_consent_enterprise',
+            [
+                'key'         => 'enable_html_blocker',
+                'default'     => '1',
+                'label'       => __('Enable full-page HTML output buffer blocking (Zero theme code changes needed)', 'tka-cookie-consent'),
+                'description' => __('Automatically captures, rewrites, and defers tracking scripts and third-party embeds in the rendered HTML output without requiring manual template code wrapping.', 'tka-cookie-consent')
+            ]
+        );
+
+        add_settings_field(
+            'enable_consent_mode',
+            __('Google Consent Mode v2', 'tka-cookie-consent'),
+            [$this, 'render_checkbox_field'],
+            'tka-cookie-consent',
+            'tka_cookie_consent_enterprise',
+            [
+                'key'         => 'enable_consent_mode',
+                'default'     => '1',
+                'label'       => __('Enable Google Consent Mode v2 & dataLayer events', 'tka-cookie-consent'),
+                'description' => __('Declares default denied status for ad_storage, ad_user_data, ad_personalization, and analytics_storage early in &lt;head&gt;, and dispatches gtag("consent", "update") and dataLayer events upon user choice.', 'tka-cookie-consent')
+            ]
+        );
+
+        add_settings_field(
+            'enable_iframe_blocker',
+            __('Third-Party Iframe Blocker', 'tka-cookie-consent'),
+            [$this, 'render_checkbox_field'],
+            'tka-cookie-consent',
+            'tka_cookie_consent_enterprise',
+            [
+                'key'         => 'enable_iframe_blocker',
+                'default'     => '1',
+                'label'       => __('Block YouTube, Vimeo, Google Maps, and external iframes with visual unlock overlay', 'tka-cookie-consent'),
+                'description' => __('Prevents external services from setting third-party cookies or receiving visitor IP addresses until the visitor allows the category or unlocks the embed directly.', 'tka-cookie-consent')
+            ]
+        );
+
+        add_settings_field(
+            'service_catalog_table',
+            __('Supported Enterprise Services', 'tka-cookie-consent'),
+            [$this, 'render_service_catalog'],
+            'tka-cookie-consent',
+            'tka_cookie_consent_enterprise'
+        );
+
         // General settings section
         add_settings_section(
             'tka_cookie_consent_general',
@@ -97,11 +155,11 @@ class AdminSettings
 
         add_settings_field(
             'btn_customize',
-            __('Customize Button Label', 'tka-cookie-consent'),
+            __('Cookie Preferences Button Label', 'tka-cookie-consent'),
             [$this, 'render_text_field'],
             'tka-cookie-consent',
             'tka_cookie_consent_general',
-            ['key' => 'btn_customize', 'default' => __('Customize', 'tka-cookie-consent')]
+            ['key' => 'btn_customize', 'default' => __('Cookie Preferences', 'tka-cookie-consent')]
         );
 
         // Advanced / Cookie blocking settings section
@@ -230,6 +288,10 @@ class AdminSettings
             $sanitized['blocked_preferences'] = sanitize_textarea_field($input['blocked_preferences']);
         }
 
+        $sanitized['enable_html_blocker'] = !empty($input['enable_html_blocker']) ? '1' : '0';
+        $sanitized['enable_consent_mode'] = !empty($input['enable_consent_mode']) ? '1' : '0';
+        $sanitized['enable_iframe_blocker'] = !empty($input['enable_iframe_blocker']) ? '1' : '0';
+
         if (current_user_can('unfiltered_html')) {
             $sanitized['scripts_statistics'] = $input['scripts_statistics'] ?? '';
             $sanitized['scripts_marketing'] = $input['scripts_marketing'] ?? '';
@@ -251,6 +313,88 @@ class AdminSettings
         }
 
         return $sanitized;
+    }
+
+    /**
+     * Render enterprise section description.
+     */
+    public function render_enterprise_section_intro()
+    {
+        echo '<p class="description">' . esc_html__('Configure automatic script blocking, Google Consent Mode v2, and third-party iframe overlays without needing to modify your theme templates.', 'tka-cookie-consent') . '</p>';
+    }
+
+    /**
+     * Render a checkbox field.
+     */
+    public function render_checkbox_field($args)
+    {
+        $value = $this->get_option($args['key'], $args['default']);
+        $checked = checked('1', $value, false);
+        printf(
+            '<label><input type="checkbox" name="%s[%s]" value="1" %s /> %s</label>',
+            esc_attr($this->option_name),
+            esc_attr($args['key']),
+            $checked,
+            esc_html($args['label'])
+        );
+        if (isset($args['description'])) {
+            echo '<p class="description" style="margin-top: 4px;">' . wp_kses_post($args['description']) . '</p>';
+        }
+    }
+
+    /**
+     * Render service catalog table.
+     */
+    public function render_service_catalog()
+    {
+        $services = \Tka\CookieConsent\Services\ServiceRegistry::get_services();
+        ?>
+        <div style="max-width: 900px; overflow-x: auto; background: #fff; border: 1px solid #c3c4c7; box-shadow: 0 1px 1px rgba(0,0,0,.04); border-radius: 4px;">
+            <table class="wp-list-table widefat striped" style="border: 0; box-shadow: none;">
+                <thead>
+                    <tr>
+                        <th style="width: 25%; font-weight: 600;"><?php esc_html_e('Service / Tool', 'tka-cookie-consent'); ?></th>
+                        <th style="width: 15%; font-weight: 600;"><?php esc_html_e('Type', 'tka-cookie-consent'); ?></th>
+                        <th style="width: 20%; font-weight: 600;"><?php esc_html_e('Consent Category', 'tka-cookie-consent'); ?></th>
+                        <th style="font-weight: 600;"><?php esc_html_e('Detection Signatures', 'tka-cookie-consent'); ?></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($services as $service): 
+                        $cat_colors = [
+                            'statistics'  => '#2271b1',
+                            'marketing'   => '#d63638',
+                            'preferences' => '#8c5e00',
+                        ];
+                        $cat_color = $cat_colors[$service['category']] ?? '#50575e';
+                    ?>
+                        <tr>
+                            <td>
+                                <strong><?php echo esc_html($service['name']); ?></strong>
+                                <div class="description" style="font-size: 11px;"><?php echo esc_html(__($service['description'], 'tka-cookie-consent')); ?></div>
+                            </td>
+                            <td>
+                                <span class="badge" style="background: #f0f0f1; border: 1px solid #dcdcde; border-radius: 3px; padding: 2px 6px; font-size: 11px; text-transform: uppercase;">
+                                    <?php echo esc_html($service['type']); ?>
+                                </span>
+                            </td>
+                            <td>
+                                <span style="display: inline-block; padding: 2px 8px; border-radius: 12px; background: <?php echo esc_attr($cat_color); ?>15; color: <?php echo esc_attr($cat_color); ?>; font-weight: 600; font-size: 12px;">
+                                    <?php echo esc_html(ucfirst($service['category'])); ?>
+                                </span>
+                            </td>
+                            <td>
+                                <code style="font-size: 11px;"><?php echo esc_html(implode(', ', $service['signatures'])); ?></code>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+        <p class="description" style="margin-top: 6px;">
+            <?php esc_html_e('The services above are recognized and intercepted automatically when Zero-Code Blocker is enabled. Additional custom scripts can be added below.', 'tka-cookie-consent'); ?>
+        </p>
+        <?php
     }
 
     /**

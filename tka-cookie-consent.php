@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       TKA Cookie Consent
  * Description:       A lightweight, modern cookie consent plugin compatible with the WP Consent API standard.
- * Version:           1.0.4
+ * Version:           1.1.0
  * Author:            TKA
  * Author URI:        https://wp-play.ddev.site
  * License:           MIT
@@ -17,7 +17,7 @@ if (!defined('WPINC')) {
 }
 
 // Define plugin constants
-define('TKA_COOKIE_CONSENT_VERSION', '1.0.0');
+define('TKA_COOKIE_CONSENT_VERSION', '1.1.0');
 define('TKA_COOKIE_CONSENT_PATH', plugin_dir_path(__FILE__));
 define('TKA_COOKIE_CONSENT_URL', plugin_dir_url(__FILE__));
 
@@ -45,11 +45,13 @@ spl_autoload_register(function ($class) {
  * Begin plugin execution.
  */
 add_action('plugins_loaded', function () {
-	load_plugin_textdomain('tka-cookie-consent', false, dirname(plugin_basename(__FILE__)) . '/languages');
-
 	// Initialize Consent API compatibility / fallbacks
 	Tka\CookieConsent\ConsentAPI::init();
 
 	// Initialize the main plugin manager
 	Tka\CookieConsent\Plugin::getInstance()->run();
+});
+
+add_action('init', function () {
+	load_plugin_textdomain('tka-cookie-consent', false, dirname(plugin_basename(__FILE__)) . '/languages');
 });
